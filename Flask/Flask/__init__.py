@@ -46,6 +46,7 @@ class User(Resource):
 		parser = reqparse.RequestParser()
 		parser.add_argument("complete_name")
 		parser.add_argument("mail")
+		parser.add_argument("password")
 		args = parser.parse_args()
 
 		#print(name)
@@ -59,17 +60,21 @@ class User(Resource):
 			name = name,
 			complete_name = args["complete_name"],
 			mail = args["mail"]
+			password = args["password"]
+			print(password)
 
 			mail = "'" + mail + "'"
+			print(mail)
 
 			school_com = str(mail).split("@")
 			school = school_com[1].split(".")[0]
 
+			print(school)
 
-			user = (name[0], complete_name[0], str(mail), school)
+			user = (name[0], complete_name[0], str(mail), password, school)
 			#print (type(name))
 
-			add_user = ("INSERT INTO users (name, lastname, mail, school) values (%s, %s, %s, %s)")
+			add_user = ("INSERT INTO users (name, lastname, mail, password, school) values (%s, %s, %s, %s, %s)")
 			cursor.execute(add_user, user)
 			cnx.commit()
 
@@ -81,6 +86,7 @@ class User(Resource):
 		parser = reqparse.RequestParser()
 		parser.add_argument("complete_name")
 		parser.add_argument("mail")
+		parser.add_argument("password")
 		args = parser.parse_args()
 
 		sqlq = ("""SELECT COUNT(1) FROM users WHERE name = '%s' """)
@@ -91,20 +97,20 @@ class User(Resource):
 			print(type(name[0]))
 			complete_name = args["complete_name"],
 			mail = args["mail"]
-			mail = "'" + mail + "'"
-			query = """ UPDATE users SET name = %s, lastname = %s, mail = %s WHERE name = %s """
-			user = (name[0], complete_name[0], str(mail), name[0])
+			password = args["password"]
+			query = """ UPDATE users SET name = %s, lastname = %s, mail = %s, password = %s WHERE name = %s """
+			user = (name[0], complete_name[0], mail, password, name[0])
 			cursor.execute(query, (user))
 			cnx.commit()
 
-
 			return jsonify(user)
-
 
 	def delete(self, name):
 		global users
 		users = [user for user in users if user["name"] != name]
 		return "{} is deleted.".format(name), 200
+
+
 
 
 api.add_resource(User, "/user/<string:name>")
